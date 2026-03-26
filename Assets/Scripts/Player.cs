@@ -5,8 +5,10 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    public Vector2 inputVec; // 키 입력 값 변수
-    public float   speed; // 플레이어의 속도 변수
+    public Vector2 inputVec; // 키 입력 값
+    public float   speed;    // 플레이어의 걷는 속도
+    public float   curspeed; // 현재 속도
+    public bool    isSprint; // 달리는 상태
     
     Rigidbody2D    rigid; // 플레이어의 rigidbody를 받아오기 위한 변수
     SpriteRenderer sprite; // 플레이어의 sprite를 제어하기위한 변수
@@ -14,9 +16,10 @@ public class Player : MonoBehaviour
 
     void Awake()
     {
-        rigid  = GetComponent<Rigidbody2D>();
-        sprite = GetComponent<SpriteRenderer>();
-        anim   = GetComponent<Animator>();
+        rigid    = GetComponent<Rigidbody2D>();
+        sprite   = GetComponent<SpriteRenderer>();
+        anim     = GetComponent<Animator>();
+        isSprint = false;
     }
 
     void FixedUpdate()
@@ -28,9 +31,18 @@ public class Player : MonoBehaviour
         // 속도 제어
         rigid.velocity = inputVec;
         */
+
+        if (isSprint)
+        {
+            curspeed = speed * 1.5f;
+        }
+        else
+        {
+            curspeed = speed;
+        }
         
         // 위치 이동
-        Vector2 nextVec = inputVec * speed * Time.fixedDeltaTime;
+        Vector2 nextVec = inputVec * curspeed * Time.fixedDeltaTime;
         rigid.MovePosition(rigid.position + nextVec);
     }
 
@@ -56,5 +68,10 @@ public class Player : MonoBehaviour
     void OnMove(InputValue value)
     {
         inputVec = value.Get<Vector2>();
+    }
+
+    void OnSprint(InputValue value)
+    {
+        isSprint = !isSprint;
     }
 }

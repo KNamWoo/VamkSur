@@ -1,15 +1,24 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MapReposition : MonoBehaviour
 {
     private Player player; // gamemanager에서 받아오는 player 스크립트의 정보를 짧게 사용하기 위한 변수
-
+    
+    Collider2D coll; // 콜라이더 불러오기
+    
     void Start()
     {
         player = GameManager.instance.player;
     }
-    
+
+    void Awake()
+    {
+        coll = GetComponent<Collider2D>();
+    }
+
     void OnTriggerExit2D(Collider2D collision)
     {
         if (!collision.CompareTag("Area"))
@@ -37,6 +46,10 @@ public class MapReposition : MonoBehaviour
                 }
                 break;
             case "Enemy":
+                if (coll.enabled)
+                {
+                    transform.Translate(playerDir * 20 + new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 0f));
+                }
                 break;
         }
     }
