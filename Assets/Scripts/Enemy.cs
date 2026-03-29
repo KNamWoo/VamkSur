@@ -9,6 +9,7 @@
 */
 
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
@@ -21,16 +22,20 @@ public class Enemy : MonoBehaviour
 
     bool isLive; // 적이 살아있는지 여부 (false이면 이동 및 애니메이션을 중단)
 
-    Rigidbody2D    rigid;   // 이 오브젝트의 Rigidbody2D 컴포넌트
-    SpriteRenderer spriter; // 이 오브젝트의 SpriteRenderer 컴포넌트 (좌우 반전에 사용)
-    Animator       anim;    // 이 오브젝트의 Animator 컴포넌트 (애니메이션 재생에 사용)
+    Rigidbody2D        rigid;   // 이 오브젝트의 Rigidbody2D 컴포넌트
+    Collider2D         collider; // 이 오브젝트의 Collider2D 컴포넌트 (충돌 감지에 사용)
+    SpriteRenderer     spriter; // 이 오브젝트의 SpriteRenderer 컴포넌트 (좌우 반전에 사용)
+    Animator           anim;    // 이 오브젝트의 Animator 컴포넌트 (애니메이션 재생에 사용)
+    WaitForFixedUpdate wait;    // 고정 프레임마다 대기하는 YieldInstruction (코루틴에서 사용)
     
     // 오브젝트 초기화. 필요한 컴포넌트를 가져오고 생존 상태를 true로 설정한다.
     void Awake()
     {
         rigid   = GetComponent<Rigidbody2D>();
+        collider = GetComponent<Collider2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim    = GetComponent<Animator>();
+        wait    = new WaitForFixedUpdate();
     }
     
     // 물리 업데이트. 고정 프레임마다 플레이어 방향으로 이동한다.
@@ -38,11 +43,9 @@ public class Enemy : MonoBehaviour
     
     void FixedUpdate()
     {
-        // 사망 상태라면 이동하지 않음
-        if (!isLive)
-        {
+        // 사망이나 피격 상태라면 이동하지 않음
+        if (!isLive || anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
             return;
-        }
             
         // 플레이어 위치에서 현재 위치를 빼서 이동 방향 벡터 계산
         Vector2 dirVec  = target.position - rigid.position;
@@ -71,9 +74,13 @@ public class Enemy : MonoBehaviour
     // 스크립트가 활성화되며 실행됨
     void OnEnable()
     {
-        target = GameManager.instance.player.GetComponent<Rigidbody2D>();
-        isLive = true;
-        curHP  = maxHP;
+        target               = GameManager.instance.player.GetComponent<Rigidbody2D>();
+        isLive               = true;
+        collider.enabled     = true;
+        rigid.simulated      = true;
+        spriter.sortingOrder = 2;
+        anim.SetBool("Dead", false);
+        curHP                = maxHP;
     }
 
     public void Init(SpawnData data)
@@ -86,19 +93,36 @@ public class Enemy : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!collision.CompareTag("Bullet"))
+        if (!collision.CompareTag("Bullet") || !isLive)
             return;
 
         curHP -= collision.GetComponent<Bullet>().damage;
-
+        StartCoroutine("KnockBack"); // = knockback()
+        
         if (curHP > 0)
         {
-            
+            // 피격
+            anim.Play("Hit");
         }
         else
         {
-            Dead();
+            // 적 사망
+            isLive               = false; // 사망 상태로 전환하여 이동 및 애니메이션 중단
+            collider.enabled     = false;
+            rigid.simulated      = false;
+            spriter.sortingOrder = 1;
+            anim.SetBool("Dead", true);
+            GameManager.instance.kill++;
+            GameManager.instance.GetExp();
         }
+    }
+
+    IEnumerator KnockBack()
+    {
+        yield return wait; // 다음 프레임까지 대기
+        Vector3 playerPos = GameManager.instance.player.transform.position;
+        Vector3 dirVec = transform.position - playerPos;
+        rigid.AddForce(dirVec.normalized * 3f, ForceMode2D.Impulse); // 넉백 효과 적용 (힘의 크기와 방향 조절)
     }
 
     void Dead()

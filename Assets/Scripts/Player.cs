@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     public float   speed;    // 기본 이동 속도 (인스펙터에서 설정)
     public float   curspeed; // 현재 실제 이동 속도 (스프린트 여부에 따라 변동)
     public bool    isSprint; // 스프린트 상태 여부 (true이면 속도 1.5배 적용)
+    public Scanner scanner;
 
     Rigidbody2D    rigid;  // 물리 이동에 사용할 Rigidbody2D 컴포넌트
     SpriteRenderer sprite; // 좌우 이동 방향에 따른 스프라이트 반전에 사용할 SpriteRenderer
@@ -31,6 +32,7 @@ public class Player : MonoBehaviour
         sprite   = GetComponent<SpriteRenderer>();
         anim     = GetComponent<Animator>();
         isSprint = false; // 시작 시 스프린트 비활성화
+        scanner = GetComponent<Scanner>();
     }
 
     // 물리 업데이트. 고정 프레임마다 플레이어를 입력 방향으로 이동시킨다.
