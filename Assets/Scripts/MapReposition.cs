@@ -1,13 +1,18 @@
+/*
+    최종 변경일: 2026.03.29
+    수정자
+    - 김남우
+    -
+
+    목적
+    - 맵이나 적이 카메라를 벗어났을 때 플레이어의 이동 방향으로 재배치. 무한 반복 맵처럼 보이도록 구현한다
+*/
+
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-/// <summary>
-/// 맵 타일 또는 적 오브젝트가 카메라 영역(Area)을 벗어났을 때
-/// 플레이어 이동 방향으로 재배치(Reposition)하는 스크립트.
-/// 무한 반복 맵처럼 보이는 효과를 구현한다.
-/// </summary>
 public class MapReposition : MonoBehaviour
 {
     // GameManager를 통해 가져온 Player 스크립트 참조 (플레이어 위치·입력 벡터 접근용)
@@ -16,30 +21,26 @@ public class MapReposition : MonoBehaviour
     // 이 오브젝트의 Collider2D (적 오브젝트의 활성 여부 확인에 사용)
     Collider2D coll;
     
-    /// <summary>
-    /// 게임 시작 시 GameManager에서 플레이어 참조를 가져온다.
-    /// (GameManager.instance가 Awake에서 초기화되므로 Start에서 접근)
-    /// </summary>
+    // 게임 시작 시 GameManager에서 플레이어 참조를 가져온다.
+    // (GameManager.instance가 Awake에서 초기화되므로 Start에서 접근)
     void Start()
     {
         player = GameManager.instance.player;
     }
 
-    /// <summary>
-    /// 오브젝트 초기화. 이 오브젝트의 Collider2D를 가져온다.
-    /// </summary>
+    
+    // 오브젝트 초기화. 이 오브젝트의 Collider2D를 가져온다.
     void Awake()
     {
         coll = GetComponent<Collider2D>();
     }
-
-    /// <summary>
-    /// 이 오브젝트가 "Area" 태그를 가진 트리거 콜라이더 영역을 벗어났을 때 호출된다.
-    /// 오브젝트의 태그에 따라 재배치 방식이 다르다:
-    ///   - "Ground": 플레이어와의 거리 차이가 큰 축 방향으로 40유닛 이동 (무한 맵 구현)
-    ///   - "Enemy" : 플레이어 이동 방향으로 20유닛 + 랜덤 오프셋 이동 (적 재스폰 효과)
-    /// </summary>
-    /// <param name="collision">벗어난 영역의 Collider2D (Area 트리거여야 처리됨)</param>
+    
+    // 이 오브젝트가 "Area" 태그를 가진 트리거 콜라이더 영역을 벗어났을 때 호출된다.
+    // 오브젝트의 태그에 따라 재배치 방식이 다르다:
+    //   - "Ground": 플레이어와의 거리 차이가 큰 축 방향으로 40유닛 이동 (무한 맵 구현)
+    //   - "Enemy" : 플레이어 이동 방향으로 20유닛 + 랜덤 오프셋 이동 (적 재스폰 효과)
+    
+    // collider가 트리거 collider에서 벗어났을때 작동함
     void OnTriggerExit2D(Collider2D collision)
     {
         // "Area" 태그가 아닌 콜라이더와의 이벤트는 무시
