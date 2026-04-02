@@ -14,16 +14,14 @@ public class Weapon : MonoBehaviour
 
     void Awake()
     {
-        player = GetComponentInParent<Player>();
-    }
-
-    void Start()
-    {
-        Init();
+        player = GameManager.instance.player;
     }
 
     void Update()
     {
+        if(!GameManager.instance.isGameLive)
+            return;
+        
         switch (id)
         {
             case 0:
@@ -48,27 +46,59 @@ public class Weapon : MonoBehaviour
 
     public void LevelUp(float damage, int count)
     {
-        this.damage = damage;
-        this.count += count;
+        this.damage =  damage * Character.Damage;
+        this.count  += count;
 
         if (id == 0)
         {
             Batch();
         }
+        
+        // 새 무기가 장비의 효과를 받을 수 있도록
+        // player의 모든 gear에 ApplyGear를 실행하게 전달
+        player.BroadcastMessage("ApplyGear", SendMessageOptions.DontRequireReceiver);
     }
 
-    void Init()
+    public void Init(ItemData data)
     {
+        // Basic set
+        name             = "Weapon " + data.itemID;
+        transform.parent = player.transform;
+        transform.localPosition = Vector3.zero;
+        
+        // Property Set
+        id     = data.itemID;
+        damage = data.baseDamage * Character.Damage;
+        count = data.baseCount + Character.Count;
+
+        for(int i = 0; i < GameManager.instance.pool.prefabs.Length; i++)
+        {
+            if(data.projectile == GameManager.instance.pool.prefabs[i])
+            {
+                prefabId = i;
+                break;
+            }
+        }
+        
         switch (id)
         {
             case 0:
-                speed = -150; // 시계방향으로 회전
+                speed = 150 * Character.WeaponSpeed; // 시계방향으로 회전
                 Batch();
                 break;
             default:
-                speed = 0.3f; // 발사 간격 (초)
+                speed = 0.5f * Character.WeaponRate; // 발사 간격 (초)
                 break;
         }
+        
+        // Hand Set
+        Hand hand = player.hands[(int)data.itemType];
+        hand.spriter.sprite = data.hand;
+        hand.gameObject.SetActive(true);
+        
+        // 새 무기가 장비의 효과를 받을 수 있도록
+        // player의 모든 gear에 ApplyGear를 실행하게 전달
+        player.BroadcastMessage("ApplyGear", SendMessageOptions.DontRequireReceiver);
     }
 
     void Batch()

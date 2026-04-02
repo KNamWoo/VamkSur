@@ -43,8 +43,8 @@ public class Enemy : MonoBehaviour
     
     void FixedUpdate()
     {
-        // 사망이나 피격 상태라면 이동하지 않음
-        if (!isLive || anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+        // 사망이나 피격, 게임이 멈춘 상태라면 이동하지 않음
+        if (!GameManager.instance.isGameLive || !isLive || anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
             return;
             
         // 플레이어 위치에서 현재 위치를 빼서 이동 방향 벡터 계산
@@ -61,11 +61,9 @@ public class Enemy : MonoBehaviour
     // 렌더링 직전 업데이트. 플레이어가 적의 왼쪽에 있으면 스프라이트를 좌우 반전시킨다.
     void LateUpdate()
     {
-        // 사망 상태라면 스프라이트 반전 처리 생략
-        if (!isLive)
-        {
+        // 사망이나 게임이 멈춘 상태라면 스프라이트 반전 처리 생략
+        if (!isLive || !GameManager.instance.isGameLive)
             return;
-        }
         
         // 플레이어가 적보다 왼쪽에 있으면 flipX = true (스프라이트 좌우 반전)
         spriter.flipX = target.position.x < rigid.position.x;
