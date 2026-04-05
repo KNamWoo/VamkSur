@@ -123,7 +123,7 @@ public class Weapon : MonoBehaviour
             bullet.Rotate(rotVec);
             // 플레이어로부터 1.5f만큼 떨어진 위치에서 회전
             bullet.Translate(bullet.up * 1.5f, Space.World);
-            bullet.GetComponent<Bullet>().Init(damage, -1, Vector3.zero); // -1로 무한 관통하게 설정
+            bullet.GetComponent<Bullet>().Init(damage, -100, Vector3.zero); // -1로 무한 관통하게 설정
         }
     }
 

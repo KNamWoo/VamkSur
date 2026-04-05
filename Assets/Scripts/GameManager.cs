@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
 	public LevelUp     uiLevelUp;
 	public Result      uiResult;
 	public GameObject  enemyCleaner;
+	public Transform   uiJoy;
 	
 	[Header("# Player Info")] 
 	public int playerID;
@@ -50,7 +51,7 @@ public class GameManager : MonoBehaviour
 	{
 		// 싱글턴 패턴: 이 스크립트가 부착된 오브젝트를 전역 인스턴스로 설정
 		instance = this;
-		// DontDestroyOnLoad(instance); // 씬 전환 시에도 파괴되지 않도록 하려면 주석 해제
+		Application.targetFrameRate = 60;
 	}
 
 	public void GameStart(int id)
@@ -112,6 +113,11 @@ public class GameManager : MonoBehaviour
 		SceneManager.LoadScene("SampleScene");
 	}
 
+	public void GameQuit()
+	{
+		Application.Quit();
+	}
+
 	void Update()
 	{
 		if(!isGameLive)
@@ -144,11 +150,13 @@ public class GameManager : MonoBehaviour
 	{
 		isGameLive = false;
 		Time.timeScale = 0f;
+		uiJoy.localScale = Vector3.zero;
 	}
 
 	public void Resume()
 	{
-		isGameLive = true;
-		Time.timeScale = 1f;
+		isGameLive       = true;
+		Time.timeScale   = 1f;
+		uiJoy.localScale = Vector3.one;
 	}
 }

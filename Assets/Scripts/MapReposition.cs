@@ -49,20 +49,21 @@ public class MapReposition : MonoBehaviour
         
         Vector3 playerPos = player.transform.position; // 플레이어의 현재 월드 위치
         Vector3 myPos     = transform.position;        // 이 오브젝트의 현재 월드 위치
-        
-        // 플레이어와 이 오브젝트 사이의 X, Y 거리 차이 계산
-        float diffX = Mathf.Abs(playerPos.x - myPos.x);
-        float diffY = Mathf.Abs(playerPos.y - myPos.y);
-
-        Vector3 playerDir = player.inputVec; // 플레이어의 현재 이동 입력 방향 벡터
-        // 플레이어가 왼쪽으로 이동하면 -1, 오른쪽이면 +1
-        float dirX = playerDir.x < 0 ? -1 : 1;
-        // 플레이어가 아래쪽으로 이동하면 -1, 위쪽이면 +1
-        float dirY = playerDir.y < 0 ? -1 : 1;
 
         switch (transform.tag)
         {
             case "Ground":
+                // 플레이어와 이 오브젝트 사이의 X, Y 거리 차이 계산
+                float diffX = playerPos.x - myPos.x;
+                float diffY = playerPos.y - myPos.y;
+                // 플레이어가 왼쪽으로 이동하면 -1, 오른쪽이면 +1
+                float dirX = diffX < 0 ? -1 : 1;
+                // 플레이어가 아래쪽으로 이동하면 -1, 위쪽이면 +1
+                float dirY = diffY < 0 ? -1 : 1;
+                
+                diffX = Mathf.Abs(diffX);
+                diffY = Mathf.Abs(diffY);
+                
                 // 가로 거리가 더 크면 X축 방향으로 재배치 (좌우 이동 시 타일 순환)
                 if (diffX > diffY)
                 {
@@ -79,8 +80,10 @@ public class MapReposition : MonoBehaviour
                 // 적의 콜라이더가 활성화되어 있을 때만 재배치 (비활성화된 적은 이동 안 함)
                 if (coll.enabled)
                 {
+                    Vector3 dist = playerPos - myPos;
+                    Vector3 ran  = new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 0);
                     // 플레이어 이동 방향으로 20유닛 이동 + 겹침 방지를 위한 랜덤 오프셋 추가
-                    transform.Translate(playerDir * 20 + new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 0f));
+                    transform.Translate(ran + dist * 2);
                 }
                 break;
         }
